@@ -1,22 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
+/* Light mode variables */
 :root {
-	line-height: 1.5;
-	font-weight: 400;
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	font-family: 'Inter', sans-serif;
-	font-optical-sizing: auto;
-	font-style: normal;
-	font-variation-settings: 'slnt' 0;
+  --color-primary: #4F46E5;      /* Indigo Blue */
+  --color-secondary: #06B6D4;    /* Cyan */
+  --color-main: #FBCFE8;         /* Soft Pink */
+  --color-background: #F5F5FF;   /* Soft White */
+  --color-foreground: #1F2937;   /* Dark Gray */
+  --color-title: #F43F5E;        /* Rose Red */
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #add2e4;
+    --color-secondary: #0ab5cf;
+    --color-main: #7afcfc;
+    --color-background: #033f3f;
+    --color-foreground: #d4ebc6;
+    --color-title: #FB7185;
+  }
 }
 
 @layer base {
-	body {
-		@apply bg-zinc-950 text-neutral-200;
-	}
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Inter', sans-serif;
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }
