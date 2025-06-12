@@ -7,10 +7,6 @@ import { ConnectButton } from 'thirdweb/react';
 import { client } from '@/app/client';
 import Link from 'next/link';
 import { useDataContext } from '@/context/DataContext';
-type MenuItem = {
-  name: string;
-  path: string;
-};
 
 const menuItems: MenuItem[] = [
   { name: 'Home', path: '/' },

@@ -1,4 +1,26 @@
-// Enhanced types
+
+// Navbar
+
+type MenuItem = {
+  name: string;
+  path: string;
+};
+
+
+//DataContext
+interface DataContextProps {
+  isLive: boolean;
+  isLoading: boolean;
+  lastUpdate: Date;
+  handleRefresh: () => Promise<void>;
+  registerRefreshCallback: (callback: () => Promise<void>) => void;
+  unregisterRefreshCallback: () => void;
+}
+
+
+// TokenNewsApp
+
+// Type definitions
 interface Token {
   symbol: string;
   name: string;
@@ -13,19 +35,6 @@ interface Token {
   high24h: number;
   low24h: number;
   lastUpdated: Date;
-}
-
-interface CryptoAPIResponse {
-  id: string;
-  symbol: string;
-  name: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  total_volume: number;
-  high_24h: number;
-  low_24h: number;
-  last_updated: string;
 }
 
 interface NewsArticle {
@@ -48,6 +57,19 @@ interface TradingSuggestion {
   stopLoss: number;
   reasoning: string;
   timeframe: string;
+}
+
+interface CryptoAPIResponse {
+  id: string;
+  symbol: string;
+  name: string;
+  current_price: number;
+  market_cap: number;
+  total_volume: number;
+  price_change_percentage_24h: number;
+  high_24h: number;
+  low_24h: number;
+  last_updated: string;
 }
 
 type NewsFilter = 'all' | 'positive' | 'negative' | 'trending';

@@ -1,14 +1,6 @@
-// app/DataContext.tsx
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-
-interface DataContextProps {
-  isLive: boolean;
-  isLoading: boolean;
-  lastUpdate: Date;
-  handleRefresh: () => Promise<void>;
-}
 
 const DataContext = createContext<DataContextProps | undefined>(undefined);
 
@@ -18,12 +10,11 @@ export const DataProvider: React.FC<{
   const [isLive, setIsLive] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [refreshCallback, setRefreshCallback] = useState<(() => Promise<void>) | null>(null);
 
-  // Check connectivity status
   const fetchStatus = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Use CoinGecko ping for lightweight connectivity check
       const response = await fetch('https://api.coingecko.com/api/v3/ping');
       if (response.ok) {
         setIsLive(true);
@@ -39,25 +30,47 @@ export const DataProvider: React.FC<{
     }
   }, []);
 
-  // Handle refresh
   const handleRefresh = useCallback(async () => {
-    await fetchStatus();
-  }, [fetchStatus]);
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        fetchStatus(),
+        refreshCallback ? refreshCallback() : Promise.resolve(),
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchStatus, refreshCallback]);
 
-  // Initial fetch and periodic updates
+  const registerRefreshCallback = useCallback((callback: () => Promise<void>) => {
+    setRefreshCallback(() => callback);
+  }, []);
+
+  const unregisterRefreshCallback = useCallback(() => {
+    setRefreshCallback(null);
+  }, []);
+
   useEffect(() => {
-    fetchStatus();
+    handleRefresh();
     const interval = setInterval(() => {
       if (isLive) {
-        fetchStatus();
+        handleRefresh();
       }
-    }, 30000); // Check every 30 seconds
-
+    }, 30000); // 30 seconds for prices
     return () => clearInterval(interval);
-  }, [fetchStatus, isLive]);
+  }, [handleRefresh, isLive]);
 
   return (
-    <DataContext.Provider value={{ isLive, isLoading, lastUpdate, handleRefresh }}>
+    <DataContext.Provider
+      value={{
+        isLive,
+        isLoading,
+        lastUpdate,
+        handleRefresh,
+        registerRefreshCallback,
+        unregisterRefreshCallback,
+      }}
+    >
       {children}
     </DataContext.Provider>
   );
