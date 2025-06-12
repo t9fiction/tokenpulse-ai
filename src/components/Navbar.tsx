@@ -1,177 +1,167 @@
-"use client";
+// app/Navbar.tsx
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ConnectButton } from "thirdweb/react";
-import { client } from "@/app/client";
-import { Menu, X } from "lucide-react";
-
+import React, { useState } from 'react';
+import { TrendingUp, RefreshCw, Bell, Wifi, WifiOff, Menu, X } from 'lucide-react';
+import { ConnectButton } from 'thirdweb/react';
+import { client } from '@/app/client';
+import Link from 'next/link';
+import { useDataContext } from '@/context/DataContext';
 type MenuItem = {
   name: string;
   path: string;
 };
 
 const menuItems: MenuItem[] = [
-  { name: "Home", path: "/" },
-  { name: "Dashboard", path: "/dashboard" },
+  { name: 'Home', path: '/' },
+  { name: 'Dashboard', path: '/dashboard' },
 ];
 
 const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [active, setActive] = useState("Explore NFTs");
-  const menuRef = useRef<HTMLDivElement>(null);
+  const { isLive, isLoading, lastUpdate, handleRefresh } = useDataContext();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  const handleMenuItemClick = (itemName: string) => {
-    setActive(itemName);
-    setIsOpen(false);
-  };
-
-  // Close menu on Escape key press
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isOpen) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
-
-  // Focus trapping for accessibility
-  useEffect(() => {
-    if (isOpen && menuRef.current) {
-      const focusableElements = menuRef.current.querySelectorAll(
-        'a[href], button, [tabindex]:not([tabindex="-1"])'
-      );
-      const firstElement = focusableElements[0] as HTMLElement;
-      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-      const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key === "Tab") {
-          if (e.shiftKey && document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-          } else if (!e.shiftKey && document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-          }
-        }
-      };
-
-      document.addEventListener("keydown", handleTabKey);
-      firstElement?.focus();
-
-      return () => document.removeEventListener("keydown", handleTabKey);
-    }
-  }, [isOpen]);
 
   return (
-    <>
-      <nav className="fixed top-0 min-w-full z-50 flex items-center justify-between px-6 py-4 bg-background border-b border-border shadow-sm">
-        {/* Logo */}
-        <Link href="/" onClick={() => handleMenuItemClick("Explore NFTs")}>
-          <div className="flex items-center gap-3">
-            {/* <Image
-              src="/logo.png"
-              width={40}
-              height={40}
-              alt="METIS AI"
-              className="object-contain rounded-full"
-            /> */}
-            <span className="hidden sm:flex font-inter font-bold text-xl tracking-tight text-foreground">
-              METIS AI
-            </span>
+    <header className="bg-background backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo and Brand */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                TokenPulse AI
+              </h1>
+            </div>
+
+            {/* Live Status - Hidden on mobile */}
+            <div className="hidden md:flex items-center space-x-2 text-sm">
+              {isLive ? (
+                <Wifi className="h-4 w-4 text-green-500" />
+              ) : (
+                <WifiOff className="h-4 w-4 text-red-500" />
+              )}
+              <span className="text-gray-600">{isLive ? 'Live Data' : 'Offline Mode'}</span>
+              <span className="hidden lg:inline text-xs text-gray-400">
+                Updated {lastUpdate.toLocaleTimeString()}
+              </span>
+            </div>
           </div>
-        </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center fixed justify-center left-0 right-0 space-x-6">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.path}
-              className={`font-inter text-sm font-medium transition-colors hover:text-primary uppercase ${
-                active === item.name ? "text-primary" : ""
-              }`}
-              onClick={() => setActive(item.name)}
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Navigation Links */}
+            <nav className="flex space-x-4">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className="text-fontMain hover:text-fontHover font-medium transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+
+            <button
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
+              title="Refresh Data"
+              aria-label="Refresh Data"
             >
-              {item.name}
-            </Link>
-          ))}
-        </div>
+              <RefreshCw className={`h-5 w-5 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
 
-        {/* Right Section - Desktop */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="rounded-lg fixed right-2 text-white uppercase tracking-[10px] font-poppins font-extralight text-sm px-2 py-2 transition-all ">
+            <button
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              title="Notifications"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 w-5 text-gray-600" />
+            </button>
+
             <ConnectButton client={client} />
           </div>
-        </div>
 
-        {/* Mobile Right Section */}
-        <div className="flex md:hidden items-center gap-3">
-          <button
-            onClick={toggleMenu}
-            className="p-2 rounded-md hover:bg-accent transition-colors"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </nav>
-
-      {/* Mobile Menu Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-
-      {/* Mobile Menu */}
-      <div
-        ref={menuRef}
-        className={`fixed top-[4.5rem] left-0 right-0 z-50 bg-background border-b border-border shadow-lg transform transition-all duration-300 ease-in-out md:hidden ${
-          isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none"
-        }`}
-      >
-        <div className="px-6 py-4 space-y-4">
-          {/* Mobile Navigation Links */}
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              href={item.path}
-              className={`block font-inter text-base font-medium transition-colors hover:text-primary uppercase py-2 ${
-                active === item.name ? "text-primary" : ""
-              }`}
-              onClick={() => handleMenuItemClick(item.name)}
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+              aria-label={isMobileMenuOpen ? 'Close Menu' : 'Open Menu'}
             >
-              {item.name}
-            </Link>
-          ))}
-
-          {/* Mobile Wallet Connection */}
-          <div className="pt-4 border-t border-border">
-            {/* <div className="flex items-center gap-4"> */}
-              {/* <Image
-                src="/logo.png"
-                width={40}
-                height={40}
-                alt="Alpha NFTs"
-                className="object-contain rounded-full"
-              /> */}
-              <div className="flex-1">
-                <ConnectButton client={client} />
-              </div>
-            {/* </div> */}
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6 text-gray-600" />
+              ) : (
+                <Menu className="h-6 w-6 text-gray-600" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 py-4">
+            {/* Live Status for Mobile */}
+            <div className="flex items-center justify-center space-x-2 text-sm mb-4 pb-4 border-b border-gray-100">
+              {isLive ? (
+                <Wifi className="h-4 w-4 text-green-500" />
+              ) : (
+                <WifiOff className="h-4 w-4 text-red-500" />
+              )}
+              <span className="text-gray-600">{isLive ? 'Live Data' : 'Offline Mode'}</span>
+              <span className="text-xs text-gray-400">
+                Updated {lastUpdate.toLocaleTimeString()}
+              </span>
+            </div>
+
+            {/* Mobile Navigation */}
+            <nav className="space-y-3">
+              {menuItems.map((item) => (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className="block w-full text-center text-gray-700 font-medium p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Mobile Actions */}
+            <div className="space-y-3 mt-4">
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                aria-label="Refresh Data"
+              >
+                <RefreshCw className={`h-5 w-5 text-gray-600 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="text-gray-700 font-medium">Refresh Data</span>
+              </button>
+
+              <button
+                className="w-full flex items-center justify-center space-x-2 p-3 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-gray-600" />
+                <span className="text-gray-700 font-medium">Notifications</span>
+              </button>
+
+              <div className="flex justify-center">
+                <ConnectButton client={client} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </>
+    </header>
   );
 };
 

@@ -4,23 +4,27 @@
 
 /* Light mode variables */
 :root {
-  --color-primary: #4F46E5;      /* Indigo Blue */
-  --color-secondary: #06B6D4;    /* Cyan */
-  --color-main: #FBCFE8;         /* Soft Pink */
-  --color-background: #F5F5FF;   /* Soft White */
-  --color-foreground: #1F2937;   /* Dark Gray */
-  --color-title: #F43F5E;        /* Rose Red */
+  --color-primary: #4f46e5; /* Indigo Blue */
+  --color-secondary: #06b6d4; /* Cyan */
+  --color-main: #fbcfe8; /* Soft Pink */
+  --color-background: #f5f5ff;
+  --color-font: #f5f5ff;
+  --color-font-hover: #f5f5ff;
+  --color-foreground: #1f2937; /* Dark Gray */
+  --color-title: #f43f5e; /* Rose Red */
 }
 
 /* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: #add2e4;
+    --color-primary: #041822;
     --color-secondary: #0ab5cf;
     --color-main: #7afcfc;
-    --color-background: #033f3f;
-    --color-foreground: #d4ebc6;
-    --color-title: #FB7185;
+    --color-background: #0c1421;
+    --color-font: #7afcfc;
+    --color-font-hover: #0d8a8a;
+    --color-foreground: #f5f5ff;
+    --color-title: #fb7185;
   }
 }
 
@@ -32,7 +36,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     @apply antialiased;
   }
 }

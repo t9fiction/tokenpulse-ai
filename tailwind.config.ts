@@ -15,6 +15,8 @@ const config: Config = {
         main: 'var(--color-main)',
         background: 'var(--color-background)',
         foreground: 'var(--color-foreground)',
+        fontMain: 'var(--color-font)',
+        fontHover: 'var(--color-font-hover)',
         title: 'var(--color-title)',
       },
       fontFamily: {
