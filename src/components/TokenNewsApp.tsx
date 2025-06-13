@@ -59,6 +59,7 @@ const TokenNewsApp: React.FC = () => {
       }
 
       const data: CryptoAPIResponse[] = await response.json();
+      console.log("Fetched crypto data:", data); // Debug log
 
       const formattedTokens: Token[] = data.map((token) => {
         const currentPrice = token.current_price;
@@ -121,7 +122,7 @@ const TokenNewsApp: React.FC = () => {
         ]);
       }
     }
-  }, [tokens.length]);
+  }, []); // Removed tokens.length from dependencies
 
   // Simple sentiment analysis heuristic
   const analyzeSentiment = (
@@ -181,6 +182,7 @@ const TokenNewsApp: React.FC = () => {
 
       const data = await response.json();
       const articles = data.articles || [];
+      console.log("Fetched news data:", articles); // Debug log
 
       const formattedNews: NewsArticle[] = articles.map(
         (article: any, index: number) => {
@@ -193,17 +195,17 @@ const TokenNewsApp: React.FC = () => {
           const sentiment = analyzeSentiment(title, description);
 
           return {
-            id: article.url || `${query}-${index}`, // Fallback ID if url is missing
+            id: article.url || `${query}-${index}`,
             title,
             source,
             time: formatTimeAgo(publishedAt),
             sentiment,
-            relevance: query === "cryptocurrency" ? 70 : 90, // Higher relevance for token-specific queries
+            relevance: query === "cryptocurrency" ? 70 : 90,
             summary:
               description.slice(0, 200) +
               (description.length > 200 ? "..." : ""),
             url,
-            trending: index < 2, // Assume top 2 articles are trending
+            trending: index < 2,
             publishedAt,
           };
         }
@@ -232,12 +234,14 @@ const TokenNewsApp: React.FC = () => {
         ]);
       }
     }
-  }, [selectedToken, newsData.length]);
+  }, [selectedToken]); // Keep selectedToken as dependency
 
   // Handle refresh for TokenNewsApp
   const handleRefresh = useCallback(async () => {
-    await fetchCryptoData(); // Only fetch crypto prices
-  }, [fetchCryptoData]);
+    await fetchCryptoData(); // Fetch crypto prices
+    // Optionally fetch news on manual refresh
+    // await fetchCryptoNews();
+  }, [fetchCryptoData]); // Removed fetchCryptoNews from dependencies unless added back
 
   // Register refresh callback for crypto prices on mount, unregister on unmount
   useEffect(() => {
@@ -251,14 +255,12 @@ const TokenNewsApp: React.FC = () => {
     fetchCryptoNews();
   }, [fetchCryptoData, fetchCryptoNews]);
 
-  // Periodic news fetch every 5 minutes
+  // Periodic news fetch every 30 minutes
   useEffect(() => {
-    // Initial fetch is handled by the above useEffect, so we only set up the interval here
     const newsInterval = setInterval(() => {
       fetchCryptoNews();
-    }, 300000); // 5 minutes = 300,000 milliseconds
+    }, 1800000); // 30 minutes = 1,800,000 milliseconds
 
-    // Clean up interval on component unmount
     return () => clearInterval(newsInterval);
   }, [fetchCryptoNews]);
 
@@ -379,7 +381,7 @@ const TokenNewsApp: React.FC = () => {
 
   const handleTokenSelect = (tokenId: string): void => {
     setSelectedToken(tokenId);
-    fetchCryptoNews(); // Fetch news for the new token immediately
+    fetchCryptoNews();
   };
 
   const handleNewsFilter = (filter: NewsFilter): void => {
@@ -401,7 +403,6 @@ const TokenNewsApp: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Error Alert */}
         {error && (
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-center">
@@ -411,7 +412,6 @@ const TokenNewsApp: React.FC = () => {
           </div>
         )}
 
-        {/* Token Selection */}
         <section className="mb-8">
           <h2 className="text-2xl font-bold text-main mb-4">Select Token</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -459,7 +459,6 @@ const TokenNewsApp: React.FC = () => {
           </div>
         </section>
 
-        {/* Trading Suggestion Card */}
         {selectedTokenData && tradingSuggestion && (
           <section className="mb-8">
             <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
@@ -582,7 +581,6 @@ const TokenNewsApp: React.FC = () => {
           </section>
         )}
 
-        {/* Filters */}
         <section className="mb-6">
           <div className="flex flex-wrap gap-3">
             {(["all", "positive", "negative", "trending"] as const).map(
@@ -611,7 +609,6 @@ const TokenNewsApp: React.FC = () => {
           </div>
         </section>
 
-        {/* Loading Indicator */}
         {isLoading && (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -619,7 +616,6 @@ const TokenNewsApp: React.FC = () => {
           </div>
         )}
 
-        {/* News Feed */}
         <section className="space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-gray-900">
@@ -690,7 +686,6 @@ const TokenNewsApp: React.FC = () => {
           ))}
         </section>
 
-        {/* Live Data Notice */}
         <div className="text-center mt-8">
           <div className="inline-flex items-center space-x-2 text-sm text-gray-600 bg-white rounded-full px-4 py-2 shadow-sm border">
             <div
